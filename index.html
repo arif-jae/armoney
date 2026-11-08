@@ -72,18 +72,19 @@ details summary{cursor:pointer;font-weight:500}
 <div id="toast" role="status"></div>
 <script>
 var K='moneyapp.v1';
-var G=[{id:1,n:'เงินสด',l:0,e:'💵'},{id:2,n:'เงินฝากธนาคาร',l:0,e:'🏦'},{id:3,n:'เงินออนไลน์',l:0,e:'📱'},{id:4,n:'หนี้สิน',l:1,e:'💳'}];
+var G=[{id:1,n:'เงินสด',l:0,e:'💵'},{id:2,n:'เงินฝากธนาคาร',l:0,e:'🏦'},{id:3,n:'เงินออนไลน์',l:0,e:'📱'},{id:5,n:'สหกรณ์ออมทรัพย์',l:0,e:'🤝'},{id:4,n:'หนี้สิน',l:1,e:'💳'}];
 function seed(){return{n:100,accs:[{id:1,n:'กระเป๋าสตางค์',g:1,i:0},{id:2,n:'บัญชีธนาคาร',g:2,i:0},{id:3,n:'บัตรเครดิต',g:4,i:0}],
 cats:[[1,'รายรับจากอาชีพ','i','💼'],[2,'รายรับอื่นๆ','i','🎁'],[3,'ดอกเบี้ยเงินฝาก','i','🏦'],[4,'ใช้จ่ายในอาชีพ','e','🛠️'],[5,'ที่อยู่อาศัย','e','🏠'],[6,'อาหาร/เครื่องดื่ม','e','🍜'],[7,'เดินทาง','e','🚌'],[8,'ของใช้ประจำวัน','e','🧴'],[9,'เสื้อผ้า/แต่งกาย','e','👕'],[10,'สาธารณูปโภค','e','💡'],[11,'รักษาพยาบาล','e','💊'],[12,'สันทนาการ/สังคม','e','🎉'],[13,'ครอบครัว','e','👪'],[14,'สัตว์เลี้ยง','e','🐾'],[15,'ค่าธรรมเนียม','e','🧾'],[16,'เก็บออม','e','🐷']].map(function(c){return{id:c[0],n:c[1],t:c[2],e:c[3]}}),tx:[]}}
 var S=null;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.accs||!S.cats||!S.tx)S=seed();
+S.accs.forEach(function(a){if(a.g==6)a.g=5});
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 var nf=new Intl.NumberFormat('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
 function fmt(n){return nf.format(n)}
 function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
-var today=iso(new Date()),ym=today.slice(0,7),view='add',ft=2,armed=0,eid=0,dr={amt:'',dt:today,ac:'',nt:''};
+var today=iso(new Date()),ym=today.slice(0,7),view='add',ft=2,armed=0,eid=0,etx=0,dr={amt:'',dt:today,ac:'',nt:''};
 function acc(i){return S.accs.filter(function(a){return a.id==i})[0]||{n:'(ไม่พบบัญชี)',g:1,i:0}}
 function cat(i){return S.cats.filter(function(c){return c.id==i})[0]||{n:'(ไม่พบหมวด)',e:'•'}}
 function aic(a){return a.e||G.filter(function(g){return g.id==a.g})[0].e}
@@ -100,11 +101,11 @@ function snap(){if($('amt'))dr={amt:$('amt').value,dt:$('dt').value,ac:$('ac').v
 function vAdd(){
  if(!dr.ac)dr.ac=S.accs[0].id;
  var seg=[[2,'รายจ่าย'],[1,'รายรับ'],[3,'โอนเงิน']].map(function(p){return'<button data-a="ft" data-k="'+p[0]+'" class="'+(ft==p[0]?'on':'')+'">'+p[1]+'</button>'}).join('');
- var second=ft==3?'<label for="to">ไปยังบัญชี</label><select id="to">'+opts(S.accs)+'</select>':'<label for="cat">หมวดหมู่</label><select id="cat">'+opts(S.cats.filter(function(c){return c.t==(ft==1?'i':'e')}))+'</select>';
- return'<h2>บันทึกรายการ</h2><div class="seg">'+seg+'</div><div class="card"><label for="amt">จำนวนเงิน (บาท)</label><input id="amt" inputmode="decimal" placeholder="0.00" value="'+esc(dr.amt)+'">'
+ var second=ft==3?'<label for="to">ไปยังบัญชี</label><select id="to">'+opts(S.accs,dr.to)+'</select>':'<label for="cat">หมวดหมู่</label><select id="cat">'+opts(S.cats.filter(function(c){return c.t==(ft==1?'i':'e')}),dr.cat)+'</select>';
+ return'<h2>'+(etx?'แก้ไขรายการ':'บันทึกรายการ')+'</h2><div class="seg">'+seg+'</div><div class="card"><label for="amt">จำนวนเงิน (บาท)</label><input id="amt" inputmode="decimal" placeholder="0.00" value="'+esc(dr.amt)+'">'
  +'<label for="ac">'+(ft==3?'จากบัญชี':'บัญชี')+'</label><select id="ac">'+opts(S.accs,dr.ac)+'</select>'+second
  +'<label for="nt">บันทึกช่วยจำ</label><input id="nt" placeholder="เช่น ข้าวกลางวัน" value="'+esc(dr.nt)+'">'
- +'<label for="dt">วันที่</label><input id="dt" type="date" value="'+esc(dr.dt)+'"><button class="go" data-a="add">บันทึก</button></div>'}
+ +'<label for="dt">วันที่</label><input id="dt" type="date" value="'+esc(dr.dt)+'"><button class="go" data-a="add">'+(etx?'บันทึกการแก้ไข':'บันทึก')+'</button>'+(etx?'<button class="sm" style="width:100%" data-a="cancel">ยกเลิก</button>':'')+'</div>'}
 function monthTx(){return S.tx.filter(function(x){return x.d.slice(0,7)==ym})}
 function vList(){
  var xs=monthTx().sort(function(a,b){return b.d.localeCompare(a.d)||b.id-a.id});
@@ -114,7 +115,7 @@ function vList(){
   if(x.d!=last){last=x.d;h+='<h4>'+dth(x.d)+'</h4>'}
   var ttl=x.t==3?'🔁 โอน → '+esc(acc(x.to).n):ih(cat(x.c))+' '+esc(cat(x.c).n);
   var cls=x.t==1?'i':x.t==2?'e':'',sg=x.t==1?'+':x.t==2?'−':'';
-  h+='<div class="row"><div class="t">'+ttl+'<span>'+ih(acc(x.a))+' '+esc(acc(x.a).n)+(x.n?' · '+esc(x.n):'')+'</span></div><div class="amt '+cls+'">'+sg+fmt(x.amt)+'</div><button class="x'+(armed==x.id?' arm':'')+'" data-a="del" data-k="'+x.id+'" aria-label="ลบ">'+(armed==x.id?'ลบ?':'✕')+'</button></div>'});
+  h+='<div class="row"><div class="t">'+ttl+'<span>'+ih(acc(x.a))+' '+esc(acc(x.a).n)+(x.n?' · '+esc(x.n):'')+'</span></div><div class="amt '+cls+'">'+sg+fmt(x.amt)+'</div><button class="x" data-a="etx" data-k="'+x.id+'" aria-label="แก้ไข">✎</button><button class="x'+(armed==x.id?' arm':'')+'" data-a="del" data-k="'+x.id+'" aria-label="ลบ">'+(armed==x.id?'ลบ?':'✕')+'</button></div>'});
  return h+'</div>'}
 function vSum(){
  var inc=0,exp=0,by={};
@@ -147,19 +148,21 @@ function act(a,k){
   if(k[0]=='a'){var A=acc(id);$('an').value=A.n;$('ag').value=A.g;$('ai').value=A.i;$('ae').value=A.e||'';$('ano').value=A.note||'';$(m).querySelector('h2').textContent='แก้ไขบัญชี'}
   else{var C=cat(id);$('cn').value=C.n;$('ct').value=C.t;$('ce').value=C.e;$(m).querySelector('h2').textContent='แก้ไขหมวดหมู่'}
   $(m).querySelector('.go').textContent='บันทึกการแก้ไข';ecur=k[0]=='a'?acc(id):cat(id);pv(k[0]=='a'?'ap':'cp');$(m).hidden=false}
+ else if(a=='etx'){var x=S.tx.filter(function(y){return y.id==k})[0];etx=x.id;ft=x.t;dr={amt:String(x.amt),dt:x.d,ac:x.a,nt:x.n||'',cat:x.c,to:x.to};view='add';armed=0;render()}
+ else if(a=='cancel'){etx=0;dr={amt:'',dt:today,ac:'',nt:''};view='list';render()}
  else if(a=='open'){eid=0;$(k).hidden=false;var f=$(k).querySelector('input');if(f)f.focus()}
  else if(a=='rmimg'){pimg='';pv(k)}
  else if(a=='close'){eid=0;render()}
- else if(a=='tab'){snap();view=k;armed=0;render()}
+ else if(a=='tab'){snap();if(etx){etx=0;dr={amt:'',dt:today,ac:'',nt:''}}view=k;armed=0;render()}
  else if(a=='ft'){snap();ft=+k;render()}
  else if(a=='m'){var y=+ym.slice(0,4),m=+ym.slice(5,7)-1+(+k),d=new Date(y,m,1);ym=iso(d).slice(0,7);armed=0;render()}
  else if(a=='del'){if(armed==k){S.tx=S.tx.filter(function(x){return x.id!=k});armed=0;save();toast('ลบรายการแล้ว')}else{armed=+k;setTimeout(function(){if(armed==k){armed=0;render()}},2500)}render()}
  else if(a=='add'){
   var amt=parseFloat(String($('amt').value).replace(/,/g,''));
   if(!(amt>0))return toast('กรุณาใส่จำนวนเงินที่มากกว่า 0');
-  var x={id:S.n++,d:$('dt').value||today,t:ft,a:+$('ac').value,amt:amt,n:$('nt').value.trim()};
+  var x={id:etx||S.n++,d:$('dt').value||today,t:ft,a:+$('ac').value,amt:amt,n:$('nt').value.trim()};
   if(ft==3){x.to=+$('to').value;if(x.to==x.a)return toast('เลือกบัญชีต้นทางและปลายทางให้ต่างกัน')}else x.c=+$('cat').value;
-  S.tx.push(x);save();dr.amt='';dr.nt='';dr.dt=x.d;dr.ac=x.a;ym=x.d.slice(0,7);toast('บันทึกแล้ว');render()}
+  if(etx){S.tx=S.tx.map(function(y){return y.id==etx?x:y})}else S.tx.push(x);save();dr.amt='';dr.nt='';dr.dt=x.d;dr.ac=x.a;ym=x.d.slice(0,7);toast(etx?'บันทึกการแก้ไขแล้ว':'บันทึกแล้ว');if(etx){etx=0;view='list';dr.ac=''}render()}
  else if(a=='addacc'){var n=$('an').value.trim();if(!n)return toast('กรุณาใส่ชื่อบัญชี');var av={n:n,note:$('ano').value.trim(),e:$('ae').value.trim(),g:+$('ag').value,i:parseFloat($('ai').value)||0};if(pimg!==undefined)av.img=pimg;if(eid)Object.assign(acc(eid),av);else S.accs.push(Object.assign({id:S.n++},av));save();toast(eid?'บันทึกการแก้ไขแล้ว':'เพิ่มบัญชีแล้ว');eid=0;render()}
  else if(a=='addcat'){var c=$('cn').value.trim();if(!c)return toast('กรุณาใส่ชื่อหมวด');var cv={n:c,t:$('ct').value,e:$('ce').value.trim()||'📌'};if(pimg!==undefined)cv.img=pimg;if(eid)Object.assign(cat(eid),cv);else S.cats.push(Object.assign({id:S.n++},cv));save();toast(eid?'บันทึกการแก้ไขแล้ว':'เพิ่มหมวดแล้ว');eid=0;render()}
  else if(a=='exp'){$('bk').value=JSON.stringify(S);$('bk').select()}
