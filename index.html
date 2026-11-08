@@ -52,6 +52,11 @@ nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;b
 nav button{flex:1;max-width:130px;border:0;background:none;padding:6px 0;font-size:13px;color:var(--mut);border-radius:10px}
 nav button b{display:block;font-size:20px;font-weight:400}
 nav button.on{color:var(--acc);font-weight:600}
+#ok{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.9);z-index:20;background:var(--card);border:2px solid var(--inc);border-radius:16px;padding:20px 28px;text-align:center;min-width:230px;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+#ok.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#ok b{display:block;font-size:44px;line-height:1;color:var(--inc)}
+#ok span{display:block;margin-top:6px;font-weight:600;font-size:18px}
+#ok small{color:var(--mut);font-size:15px}
 #toast{z-index:10;position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
 textarea{width:100%;height:110px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--fg);padding:8px;font:12px monospace}
@@ -70,6 +75,7 @@ details summary{cursor:pointer;font-weight:500}
 </div>
 <nav id="nav"></nav>
 <div id="toast" role="status"></div>
+<div id="ok" role="status" aria-live="polite"></div>
 <script>
 var K='moneyapp.v1';
 var G=[{id:1,n:'เงินสด',l:0,e:'💵'},{id:2,n:'เงินฝากธนาคาร',l:0,e:'🏦'},{id:3,n:'เงินออนไลน์',l:0,e:'📱'},{id:5,n:'สหกรณ์ออมทรัพย์',l:0,e:'🤝'},{id:7,n:'ลูกหนี้',l:0,e:'🤲'},{id:4,n:'หนี้สิน',l:1,e:'💳'}];
@@ -95,6 +101,7 @@ function pv(k){var s=pimg===undefined?(ecur&&ecur.img):pimg;$(k).innerHTML=s?'<i
 function isL(a){return G.filter(function(g){return g.id==a.g})[0].l==1}
 function bal(a){var d=0;S.tx.forEach(function(x){if(x.t==1&&x.a==a.id)d+=x.amt;else if(x.t==2&&x.a==a.id)d-=x.amt;else if(x.t==3){if(x.a==a.id)d-=x.amt;if(x.to==a.id)d+=x.amt}});return isL(a)?a.i-d:a.i+d}
 function toast(m){var t=$('toast');t.textContent=m;t.className='on';clearTimeout(toast.h);toast.h=setTimeout(function(){t.className=''},1800)}
+function okmsg(t,d){var o=$('ok');o.innerHTML='<b>✓</b><span>'+esc(t)+'</span><small>'+esc(d)+'</small>';o.className='on';try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}clearTimeout(okmsg.h);okmsg.h=setTimeout(function(){o.className=''},2200)}
 function dth(d){return new Date(d+'T00:00:00').toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'})}
 function opts(list,sel){return list.map(function(o){return'<option value="'+o.id+'"'+(o.id==sel?' selected':'')+'>'+esc((ico(o)?ico(o)+' ':'')+o.n)+'</option>'}).join('')}
 function snap(){if($('amt'))dr={amt:$('amt').value,dt:$('dt').value,ac:$('ac').value,nt:$('nt').value}}
@@ -162,7 +169,7 @@ function act(a,k){
   if(!(amt>0))return toast('กรุณาใส่จำนวนเงินที่มากกว่า 0');
   var x={id:etx||S.n++,d:$('dt').value||today,t:ft,a:+$('ac').value,amt:amt,n:$('nt').value.trim()};
   if(ft==3){x.to=+$('to').value;if(x.to==x.a)return toast('เลือกบัญชีต้นทางและปลายทางให้ต่างกัน')}else x.c=+$('cat').value;
-  if(etx){S.tx=S.tx.map(function(y){return y.id==etx?x:y})}else S.tx.push(x);save();dr.amt='';dr.nt='';dr.dt=x.d;dr.ac=x.a;ym=x.d.slice(0,7);toast(etx?'บันทึกการแก้ไขแล้ว':'บันทึกแล้ว');if(etx){etx=0;view='list';dr.ac=''}render()}
+  if(etx){S.tx=S.tx.map(function(y){return y.id==etx?x:y})}else S.tx.push(x);save();dr.amt='';dr.nt='';dr.dt=x.d;dr.ac=x.a;ym=x.d.slice(0,7);okmsg(etx?'บันทึกการแก้ไขสำเร็จ':'บันทึกสำเร็จ',(x.t==1?'รายรับ ':x.t==2?'รายจ่าย ':'โอนเงิน ')+fmt(x.amt)+' บาท');if(etx){etx=0;view='list';dr.ac=''}render()}
  else if(a=='addacc'){var n=$('an').value.trim();if(!n)return toast('กรุณาใส่ชื่อบัญชี');var av={n:n,note:$('ano').value.trim(),e:$('ae').value.trim(),g:+$('ag').value,i:parseFloat($('ai').value)||0};if(pimg!==undefined)av.img=pimg;if(eid)Object.assign(acc(eid),av);else S.accs.push(Object.assign({id:S.n++},av));save();toast(eid?'บันทึกการแก้ไขแล้ว':'เพิ่มบัญชีแล้ว');eid=0;render()}
  else if(a=='addcat'){var c=$('cn').value.trim();if(!c)return toast('กรุณาใส่ชื่อหมวด');var cv={n:c,t:$('ct').value,e:$('ce').value.trim()||'📌'};if(pimg!==undefined)cv.img=pimg;if(eid)Object.assign(cat(eid),cv);else S.cats.push(Object.assign({id:S.n++},cv));save();toast(eid?'บันทึกการแก้ไขแล้ว':'เพิ่มหมวดแล้ว');eid=0;render()}
  else if(a=='exp'){$('bk').value=JSON.stringify(S);$('bk').select()}
