@@ -58,6 +58,7 @@ textarea{width:100%;height:110px;border:1px solid var(--line);border-radius:10px
 details summary{cursor:pointer;font-weight:500}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sm{padding:10px 12px;border:1px solid var(--line);background:var(--card);border-radius:10px;margin-top:8px}
+.row .t span.nt{white-space:normal}
 .ic{width:1.4em;height:1.4em;border-radius:6px;object-fit:cover;vertical-align:-.3em}
 .mdl{position:fixed;inset:0;z-index:5;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:14px}.mdl[hidden]{display:none}.mdl .card{width:100%;max-width:520px;max-height:90vh;overflow:auto;margin:0}
 </style>
@@ -130,10 +131,10 @@ function vAcc(){
  G.forEach(function(g){
   var as=S.accs.filter(function(a){return a.g==g.id});if(!as.length)return;
   h+='<h4>'+g.e+' '+g.n+'</h4><div class="card">';
-  as.forEach(function(a){var b=bal(a);tot+=g.l?-b:b;h+='<div class="row"><div class="t">'+ih(a)+' '+esc(a.n)+'</div><div class="amt '+(g.l?'e':'')+'">'+fmt(b)+'</div><button class="x" data-a="edit" data-k="a'+a.id+'" aria-label="แก้ไข">✎</button></div>'});
+  as.forEach(function(a){var b=bal(a);tot+=g.l?-b:b;h+='<div class="row"><div class="t">'+ih(a)+' '+esc(a.n)+(a.note?'<span class="nt">'+esc(a.note)+'</span>':'')+'</div><div class="amt '+(g.l?'e':'')+'">'+fmt(b)+'</div><button class="x" data-a="edit" data-k="a'+a.id+'" aria-label="แก้ไข">✎</button></div>'});
   h+='</div>'});
  return'<h2>บัญชีของฉัน</h2><div class="stats" style="grid-template-columns:1fr"><div><small>ทรัพย์สินสุทธิ (ทรัพย์สิน − หนี้สิน)</small><b class="'+(tot<0?'e':'i')+'">'+fmt(tot)+'</b></div></div>'+h
- +catList()+'<div class="two"><button class="sm" data-a="open" data-k="m-acc">➕ เพิ่มบัญชี</button><button class="sm" data-a="open" data-k="m-cat">➕ เพิ่มหมวดหมู่</button></div><div class="mdl" id="m-acc" hidden><div class="card"><div class="sp"><h2 style="margin:0">เพิ่มบัญชี</h2><button class="x" data-a="close" aria-label="ปิด">✕</button></div><label for="an">ชื่อบัญชี</label><input id="an"><label for="ae">ไอคอน (อีโมจิ)</label><input id="ae" maxlength="4" placeholder="เว้นว่างเพื่อใช้ไอคอนตามประเภท"><div class="two"><div><label for="ag">ประเภท</label><select id="ag">'+G.map(function(g){return'<option value="'+g.id+'">'+g.n+'</option>'}).join('')+'</select></div><div><label for="ai">ยอดตั้งต้น</label><input id="ai" inputmode="decimal" placeholder="0.00"></div></div><label for="af">หรืออัปโหลดรูป</label><input id="af" type="file" accept="image/*"><div id="ap"></div><button class="go" data-a="addacc">เพิ่มบัญชี</button></div></div>'
+ +catList()+'<div class="two"><button class="sm" data-a="open" data-k="m-acc">➕ เพิ่มบัญชี</button><button class="sm" data-a="open" data-k="m-cat">➕ เพิ่มหมวดหมู่</button></div><div class="mdl" id="m-acc" hidden><div class="card"><div class="sp"><h2 style="margin:0">เพิ่มบัญชี</h2><button class="x" data-a="close" aria-label="ปิด">✕</button></div><label for="an">ชื่อบัญชี</label><input id="an"><label for="ae">ไอคอน (อีโมจิ)</label><input id="ae" maxlength="4" placeholder="เว้นว่างเพื่อใช้ไอคอนตามประเภท"><label for="ano">บันทึกข้อความ</label><input id="ano" maxlength="200" placeholder="เช่น เลขบัญชีท้าย 1234 หรือวันครบกำหนดชำระ"><div class="two"><div><label for="ag">ประเภท</label><select id="ag">'+G.map(function(g){return'<option value="'+g.id+'">'+g.n+'</option>'}).join('')+'</select></div><div><label for="ai">ยอดตั้งต้น</label><input id="ai" inputmode="decimal" placeholder="0.00"></div></div><label for="af">หรืออัปโหลดรูป</label><input id="af" type="file" accept="image/*"><div id="ap"></div><button class="go" data-a="addacc">เพิ่มบัญชี</button></div></div>'
  +'<div class="mdl" id="m-cat" hidden><div class="card"><div class="sp"><h2 style="margin:0">เพิ่มหมวดหมู่</h2><button class="x" data-a="close" aria-label="ปิด">✕</button></div><label for="cn">ชื่อหมวด</label><input id="cn"><div class="two"><div><label for="ct">ชนิด</label><select id="ct"><option value="e">รายจ่าย</option><option value="i">รายรับ</option></select></div><div><label for="ce">ไอคอน (อีโมจิ)</label><input id="ce" maxlength="4" placeholder="🍚"></div></div><label for="cf">หรืออัปโหลดรูป</label><input id="cf" type="file" accept="image/*"><div id="cp"></div><button class="go" data-a="addcat">เพิ่มหมวด</button></div></div>'
  +'<details class="card"><summary>สำรองและกู้คืนข้อมูล</summary><p class="mut">ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ คัดลอกข้อความด้านล่างไปเก็บไว้เพื่อย้ายเครื่องหรือกันข้อมูลหาย</p><textarea id="bk" aria-label="ข้อมูลสำรอง"></textarea><div class="two"><button class="sm" data-a="exp">แสดงข้อมูลสำรอง</button><button class="sm" data-a="imp">นำเข้าข้อมูล</button></div></details>'}
 function render(){pimg=undefined;ecur=null;
@@ -143,7 +144,7 @@ function render(){pimg=undefined;ecur=null;
  $('nav').innerHTML=[['add','➕','บันทึก'],['list','📋','รายการ'],['sum','📊','สรุป'],['acc','🏦','บัญชี']].map(function(p){return'<button data-a="tab" data-k="'+p[0]+'" class="'+(view==p[0]?'on':'')+'"><b>'+p[1]+'</b>'+p[2]+'</button>'}).join('')}
 function act(a,k){
  if(a=='edit'){var id=+k.slice(1),m=k[0]=='a'?'m-acc':'m-cat';eid=id;
-  if(k[0]=='a'){var A=acc(id);$('an').value=A.n;$('ag').value=A.g;$('ai').value=A.i;$('ae').value=A.e||'';$(m).querySelector('h2').textContent='แก้ไขบัญชี'}
+  if(k[0]=='a'){var A=acc(id);$('an').value=A.n;$('ag').value=A.g;$('ai').value=A.i;$('ae').value=A.e||'';$('ano').value=A.note||'';$(m).querySelector('h2').textContent='แก้ไขบัญชี'}
   else{var C=cat(id);$('cn').value=C.n;$('ct').value=C.t;$('ce').value=C.e;$(m).querySelector('h2').textContent='แก้ไขหมวดหมู่'}
   $(m).querySelector('.go').textContent='บันทึกการแก้ไข';ecur=k[0]=='a'?acc(id):cat(id);pv(k[0]=='a'?'ap':'cp');$(m).hidden=false}
  else if(a=='open'){eid=0;$(k).hidden=false;var f=$(k).querySelector('input');if(f)f.focus()}
@@ -159,7 +160,7 @@ function act(a,k){
   var x={id:S.n++,d:$('dt').value||today,t:ft,a:+$('ac').value,amt:amt,n:$('nt').value.trim()};
   if(ft==3){x.to=+$('to').value;if(x.to==x.a)return toast('เลือกบัญชีต้นทางและปลายทางให้ต่างกัน')}else x.c=+$('cat').value;
   S.tx.push(x);save();dr.amt='';dr.nt='';dr.dt=x.d;dr.ac=x.a;ym=x.d.slice(0,7);toast('บันทึกแล้ว');render()}
- else if(a=='addacc'){var n=$('an').value.trim();if(!n)return toast('กรุณาใส่ชื่อบัญชี');var av={n:n,e:$('ae').value.trim(),g:+$('ag').value,i:parseFloat($('ai').value)||0};if(pimg!==undefined)av.img=pimg;if(eid)Object.assign(acc(eid),av);else S.accs.push(Object.assign({id:S.n++},av));save();toast(eid?'บันทึกการแก้ไขแล้ว':'เพิ่มบัญชีแล้ว');eid=0;render()}
+ else if(a=='addacc'){var n=$('an').value.trim();if(!n)return toast('กรุณาใส่ชื่อบัญชี');var av={n:n,note:$('ano').value.trim(),e:$('ae').value.trim(),g:+$('ag').value,i:parseFloat($('ai').value)||0};if(pimg!==undefined)av.img=pimg;if(eid)Object.assign(acc(eid),av);else S.accs.push(Object.assign({id:S.n++},av));save();toast(eid?'บันทึกการแก้ไขแล้ว':'เพิ่มบัญชีแล้ว');eid=0;render()}
  else if(a=='addcat'){var c=$('cn').value.trim();if(!c)return toast('กรุณาใส่ชื่อหมวด');var cv={n:c,t:$('ct').value,e:$('ce').value.trim()||'📌'};if(pimg!==undefined)cv.img=pimg;if(eid)Object.assign(cat(eid),cv);else S.cats.push(Object.assign({id:S.n++},cv));save();toast(eid?'บันทึกการแก้ไขแล้ว':'เพิ่มหมวดแล้ว');eid=0;render()}
  else if(a=='exp'){$('bk').value=JSON.stringify(S);$('bk').select()}
  else if(a=='imp'){try{var o=JSON.parse($('bk').value);if(!o.accs||!o.cats||!o.tx)throw 0;S=o;save();toast('นำเข้าข้อมูลแล้ว');render()}catch(e){toast('ข้อมูลไม่ถูกต้อง วางข้อมูลสำรองที่ได้จากแอปนี้')}}}
