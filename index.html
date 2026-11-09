@@ -55,6 +55,12 @@ nav button.on b{background:color-mix(in srgb,currentColor 20%,transparent)}
 nav button.on{color:var(--acc);font-weight:600}
 .bi{fill:var(--inc)}.be{fill:var(--exp)}.ln{stroke:var(--acc);fill:none;stroke-width:2}.ax{stroke:var(--line);stroke-width:1}.av{stroke:var(--acc);stroke-width:1.5;stroke-dasharray:4 3}.tx{fill:var(--mut);font-size:9px}
 .stats button{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:left;display:block}
+.pk{display:flex;align-items:center;gap:8px;width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);text-align:left;font:inherit;color:inherit}
+.pk .pn,.pr .pn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pa{white-space:nowrap;text-align:right}
+.pl{border:1px solid var(--line);border-radius:10px;margin-top:6px;overflow:hidden;background:var(--card)}
+.pr{display:flex;align-items:center;gap:8px;width:100%;padding:11px 12px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font:inherit;color:inherit}
+.pr:last-child{border-bottom:0}.pr.on{background:color-mix(in srgb,var(--acc) 14%,transparent)}
 .rb{width:100%;background:none;border:0;border-bottom:1px solid var(--line);color:inherit;text-align:left;font:inherit}.rb:last-child{border-bottom:0}
 .tg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
 .tile{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 4px;text-align:center;color:var(--fg)}
@@ -127,14 +133,17 @@ function bal(a){var d=0;S.tx.forEach(function(x){if(x.t==1&&x.a==a.id)d+=x.amt;e
 function toast(m){var t=$('toast');t.textContent=m;t.className='on';clearTimeout(toast.h);toast.h=setTimeout(function(){t.className=''},1800)}
 function okmsg(t,d){var o=$('ok');o.innerHTML='<b>✓</b><span>'+esc(t)+'</span><small>'+esc(d)+'</small>';o.className='on';try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}clearTimeout(okmsg.h);okmsg.h=setTimeout(function(){o.className=''},2200)}
 function dth(d){return new Date(d+'T00:00:00').toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'})}
-function opts(list,sel){return list.map(function(o){return'<option value="'+o.id+'"'+(o.id==sel?' selected':'')+'>'+esc((ico(o)?ico(o)+' ':'')+o.n)+'</option>'}).join('')}
+function opts(list,sel){return list.map(function(o){return'<option value="'+o.id+'"'+(o.id==sel?' selected':'')+'>'+esc((ico(o)?ico(o)+' ':'')+o.n+(o.g?(isL(o)?' · ค้าง ฿':' · ฿')+fmt(bal(o)):''))+'</option>'}).join('')}
 function snap(){if($('amt'))dr={amt:$('amt').value,dt:$('dt').value,ac:$('ac').value,nt:$('nt').value}}
+function pbtn(a){var l=isL(a);return'<span class="pn">'+ih(a)+' '+esc(a.n)+'</span><b class="pa '+(l?'e':'')+'">'+(l?'ค้าง ':'')+'฿'+fmt(bal(a))+'</b><span class="mut" aria-hidden="true">▾</span>'}
+function picker(id,label,sel){var ls=S.accs.map(function(o){var l=isL(o);return'<button type="button" class="pr'+(o.id==sel?' on':'')+'" data-a="pp" data-k="'+id+':'+o.id+'"><span class="pn">'+ih(o)+' '+esc(o.n)+'</span><b class="pa '+(l?'e':'')+'">'+(l?'ค้าง ':'')+'฿'+fmt(bal(o))+'</b></button>'}).join('');
+ return'<label for="'+id+'_b">'+label+'</label><input type="hidden" id="'+id+'" value="'+sel+'"><button type="button" class="pk" id="'+id+'_b" data-a="pk" data-k="'+id+'">'+pbtn(acc(sel))+'</button><div class="pl" id="'+id+'_l" hidden>'+ls+'</div>'}
 function vAdd(){
  if(!dr.ac)dr.ac=S.accs[0].id;
  var seg=[[2,'รายจ่าย'],[1,'รายรับ'],[3,'โอนเงิน']].map(function(p){return'<button data-a="ft" data-k="'+p[0]+'" class="'+(ft==p[0]?'on':'')+'">'+p[1]+'</button>'}).join('');
- var second=ft==3?'<label for="to">ไปยังบัญชี</label><select id="to">'+opts(S.accs,dr.to)+'</select>':'<label for="cat">หมวดหมู่</label><select id="cat">'+opts(S.cats.filter(function(c){return c.t==(ft==1?'i':'e')}),dr.cat)+'</select>';
+ var second=ft==3?picker('to','ไปยังบัญชี',dr.to||(S.accs.filter(function(x){return x.id!=dr.ac})[0]||S.accs[0]).id):'<label for="cat">หมวดหมู่</label><select id="cat">'+opts(S.cats.filter(function(c){return c.t==(ft==1?'i':'e')}),dr.cat)+'</select>';
  return'<div class="card"><div class="sp"><h2 style="margin:0">'+(etx?'แก้ไขรายการ':'เพิ่มรายการ')+'</h2><button class="x" data-a="close" aria-label="ปิด">✕</button></div><div class="seg">'+seg+'</div><label for="amt">จำนวนเงิน (บาท)</label><input id="amt" inputmode="decimal" placeholder="0.00" value="'+esc(dr.amt)+'">'
- +'<label for="ac">'+(ft==3?'จากบัญชี':'บัญชี')+'</label><select id="ac">'+opts(S.accs,dr.ac)+'</select>'+second
+ +picker('ac',ft==3?'จากบัญชี':'บัญชี',dr.ac)+second
  +'<label for="nt">บันทึกช่วยจำ</label><input id="nt" placeholder="เช่น ข้าวกลางวัน" value="'+esc(dr.nt)+'">'
  +'<label for="dt">วันที่</label><input id="dt" type="date" value="'+esc(dr.dt)+'"><button class="go" data-a="add">'+(etx?'บันทึกการแก้ไข':'บันทึก')+'</button></div>'}
 function fillTm(){var t=$('tm');t.innerHTML=vAdd();t.hidden=false}
@@ -263,6 +272,8 @@ function act(a,k){
  else if(a=='ib'){ik='';render()}
  else if(a=='gb'){gk='';ik='';render()}
  else if(a=='st'){st=k;render()}
+ else if(a=='pk'){var pl=$(k+'_l');pl.hidden=!pl.hidden}
+ else if(a=='pp'){var pa=k.split(':'),pi=pa[0],pv2=pa[1];$(pi).value=pv2;$(pi+'_b').innerHTML=pbtn(acc(pv2));$(pi+'_l').hidden=true;var pq=document.querySelectorAll('#'+pi+'_l .pr');for(var j=0;j<pq.length;j++)pq[j].className='pr'+(pq[j].dataset.k.split(':')[1]==pv2?' on':'')}
  else if(a=='fab'){fo=!fo;fmenu()}
  else if(a=='fclose'){fo=false;fmenu()}
  else if(a=='newt'){fo=false;fmenu();etx=0;ft=+k;dr={amt:'',dt:today,ac:dr.ac||'',nt:''};fillTm();$('amt').focus()}
