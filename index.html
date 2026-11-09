@@ -54,6 +54,11 @@ nav button b{display:block;font-size:20px;font-weight:400}
 nav button.on{color:var(--acc);font-weight:600}
 .bi{fill:var(--inc)}.be{fill:var(--exp)}.ln{stroke:var(--acc);fill:none;stroke-width:2}.ax{stroke:var(--line);stroke-width:1}.av{stroke:var(--acc);stroke-width:1.5;stroke-dasharray:4 3}.tx{fill:var(--mut);font-size:9px}
 .stats button{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:left;display:block}
+#fm{position:fixed;right:14px;bottom:calc(142px + env(safe-area-inset-bottom,0px));z-index:4;display:flex;flex-direction:column-reverse;gap:10px;align-items:flex-end}
+#fm[hidden],#fs[hidden]{display:none}
+.fi{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:24px;padding:12px 20px;font-weight:600;font-size:16px;box-shadow:0 3px 10px rgba(0,0,0,.25)}
+#fs{position:fixed;inset:0;z-index:3;background:rgba(0,0,0,.25)}
+#fab{transition:transform .2s}#fab.on{transform:rotate(45deg)}
 #fab{position:fixed;right:14px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:4;background:var(--acc);color:var(--accfg);border:0;border-radius:50%;width:56px;height:56px;padding:0;font-weight:400;font-size:32px;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 #ok{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.9);z-index:20;background:var(--card);border:2px solid var(--inc);border-radius:16px;padding:20px 28px;text-align:center;min-width:230px;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
 #ok.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -81,7 +86,7 @@ details summary{cursor:pointer;font-weight:500}
 <div id="ok" role="status" aria-live="polite"></div>
 <div class="mdl" id="tm" hidden></div>
 <div class="mdl" id="cm" hidden></div>
-<button id="fab" data-a="new" aria-label="เพิ่มรายการ">+</button>
+<div id="fs" hidden data-a="fclose"></div><div id="fm" hidden></div><button id="fab" data-a="fab" aria-label="เพิ่ม" aria-expanded="false">+</button>
 <script>
 var K='moneyapp.v1';
 var G=[{id:1,n:'เงินสด',l:0,e:'💵'},{id:2,n:'เงินฝากธนาคาร',l:0,e:'🏦'},{id:3,n:'เงินออนไลน์',l:0,e:'📱'},{id:5,n:'สหกรณ์ออมทรัพย์',l:0,e:'🤝'},{id:7,n:'ลูกหนี้',l:0,e:'🤲'},{id:4,n:'หนี้สิน',l:1,e:'💳'}];
@@ -141,6 +146,10 @@ function vSum(){
  if(!ks.length)h+='<span class="mut">ยังไม่มี'+(ex?'รายจ่าย':'รายรับ')+'ในเดือนนี้</span>';
  ks.forEach(function(k){var p=Math.round(src[k]/tot*100);h+='<div style="margin:8px 0"><div class="sp"><span>'+ih(cat(k))+' '+esc(cat(k).n)+'</span><span>'+fmt(src[k])+' <span class="mut">('+p+'%)</span></span></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'});
  return h+'</div>'}
+var fo=false;
+function fmenu(){var m=$('fm'),f=$('fab'),a=view=='acc',its=a?[['m-acc','เพิ่มบัญชี'],['m-cat','เพิ่มหมวดหมู่']]:[[2,'รายจ่าย'],[1,'รายรับ'],[3,'โอนเงิน']];
+ m.innerHTML=its.map(function(p){return'<button class="fi" data-a="'+(a?'fopen':'newt')+'" data-k="'+p[0]+'">'+p[1]+'</button>'}).join('');
+ m.hidden=$('fs').hidden=!fo;f.className=fo?'on':'';f.setAttribute('aria-expanded',fo?'true':'false')}
 var CH;
 function cdraw(){if(!$('c1')||!CH)return;var z=CH.ps[CH.sel],set=function(i,t){$('c'+i).textContent=t};
  if(z){set(1,z.n.length>12?z.n.slice(0,11)+'…':z.n);set(2,(z.v/CH.tot*100).toFixed(1)+'%');set(3,'฿'+fmt(z.v))}else{set(1,CH.k=='n'?'คงเหลือ':'รวม');set(2,'฿'+fmt(CH.T));set(3,'')}
@@ -171,7 +180,7 @@ function vAcc(){
   as.forEach(function(a){var b=bal(a);tot+=g.l?-b:b;h+='<div class="row"><div class="t">'+ih(a)+' '+esc(a.n)+(a.note?'<span class="nt">'+esc(a.note)+'</span>':'')+'</div><div class="amt '+(g.l?'e':'')+'">'+fmt(b)+'</div><button class="x" data-a="edit" data-k="a'+a.id+'" aria-label="แก้ไข">✎</button></div>'});
   h+='</div>'});
  return'<h2>บัญชีของฉัน</h2><div class="stats" style="grid-template-columns:1fr"><div><small>ทรัพย์สินสุทธิ (ทรัพย์สิน − หนี้สิน)</small><b class="'+(tot<0?'e':'i')+'">'+fmt(tot)+'</b></div></div>'+h
- +catList()+'<div class="two"><button class="sm" data-a="open" data-k="m-acc">➕ เพิ่มบัญชี</button><button class="sm" data-a="open" data-k="m-cat">➕ เพิ่มหมวดหมู่</button></div><div class="mdl" id="m-acc" hidden><div class="card"><div class="sp"><h2 style="margin:0">เพิ่มบัญชี</h2><button class="x" data-a="close" aria-label="ปิด">✕</button></div><label for="an">ชื่อบัญชี</label><input id="an"><label for="ae">ไอคอน (อีโมจิ)</label><input id="ae" maxlength="4" placeholder="เว้นว่างเพื่อใช้ไอคอนตามประเภท"><label for="ano">บันทึกข้อความ</label><input id="ano" maxlength="200" placeholder="เช่น เลขบัญชีท้าย 1234 หรือวันครบกำหนดชำระ"><div class="two"><div><label for="ag">ประเภท</label><select id="ag">'+G.map(function(g){return'<option value="'+g.id+'">'+g.n+'</option>'}).join('')+'</select></div><div><label for="ai">ยอดตั้งต้น</label><input id="ai" inputmode="decimal" placeholder="0.00"></div></div><label for="af">หรืออัปโหลดรูป</label><input id="af" type="file" accept="image/*"><div id="ap"></div><button class="go" data-a="addacc">เพิ่มบัญชี</button></div></div>'
+ +catList()+'<div class="mdl" id="m-acc" hidden><div class="card"><div class="sp"><h2 style="margin:0">เพิ่มบัญชี</h2><button class="x" data-a="close" aria-label="ปิด">✕</button></div><label for="an">ชื่อบัญชี</label><input id="an"><label for="ae">ไอคอน (อีโมจิ)</label><input id="ae" maxlength="4" placeholder="เว้นว่างเพื่อใช้ไอคอนตามประเภท"><label for="ano">บันทึกข้อความ</label><input id="ano" maxlength="200" placeholder="เช่น เลขบัญชีท้าย 1234 หรือวันครบกำหนดชำระ"><div class="two"><div><label for="ag">ประเภท</label><select id="ag">'+G.map(function(g){return'<option value="'+g.id+'">'+g.n+'</option>'}).join('')+'</select></div><div><label for="ai">ยอดตั้งต้น</label><input id="ai" inputmode="decimal" placeholder="0.00"></div></div><label for="af">หรืออัปโหลดรูป</label><input id="af" type="file" accept="image/*"><div id="ap"></div><button class="go" data-a="addacc">เพิ่มบัญชี</button></div></div>'
  +'<div class="mdl" id="m-cat" hidden><div class="card"><div class="sp"><h2 style="margin:0">เพิ่มหมวดหมู่</h2><button class="x" data-a="close" aria-label="ปิด">✕</button></div><label for="cn">ชื่อหมวด</label><input id="cn"><div class="two"><div><label for="ct">ชนิด</label><select id="ct"><option value="e">รายจ่าย</option><option value="i">รายรับ</option></select></div><div><label for="ce">ไอคอน (อีโมจิ)</label><input id="ce" maxlength="4" placeholder="🍚"></div></div><label for="cf">หรืออัปโหลดรูป</label><input id="cf" type="file" accept="image/*"><div id="cp"></div><button class="go" data-a="addcat">เพิ่มหมวด</button></div></div>'
  +'<details class="card"><summary>สำรองและกู้คืนข้อมูล</summary><p class="mut">ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้ คัดลอกข้อความด้านล่างไปเก็บไว้เพื่อย้ายเครื่องหรือกันข้อมูลหาย</p><textarea id="bk" aria-label="ข้อมูลสำรอง"></textarea><div class="two"><button class="sm" data-a="exp">แสดงข้อมูลสำรอง</button><button class="sm" data-a="imp">นำเข้าข้อมูล</button></div></details>'}
 function render(){pimg=undefined;ecur=null;
@@ -189,11 +198,14 @@ function act(a,k){
  else if(a=='chart'){$('cm').innerHTML=vChart(k);$('cm').hidden=false;cdraw()}
  else if(a=='sl'){CH.sel=CH.sel==k?-1:+k;cdraw()}
  else if(a=='st'){st=k;render()}
- else if(a=='new'){etx=0;ft=2;dr={amt:'',dt:today,ac:dr.ac||'',nt:''};fillTm();$('amt').focus()}
+ else if(a=='fab'){fo=!fo;fmenu()}
+ else if(a=='fclose'){fo=false;fmenu()}
+ else if(a=='newt'){fo=false;fmenu();etx=0;ft=+k;dr={amt:'',dt:today,ac:dr.ac||'',nt:''};fillTm();$('amt').focus()}
+ else if(a=='fopen'){fo=false;fmenu();act('open',k)}
  else if(a=='open'){eid=0;$(k).hidden=false;var f=$(k).querySelector('input');if(f)f.focus()}
  else if(a=='rmimg'){pimg='';pv(k)}
  else if(a=='close'){eid=0;etx=0;tclose();$('cm').hidden=true;render()}
- else if(a=='tab'){snap();if(etx){etx=0;dr={amt:'',dt:today,ac:'',nt:''}}view=k;armed=0;render()}
+ else if(a=='tab'){fo=false;fmenu();snap();if(etx){etx=0;dr={amt:'',dt:today,ac:'',nt:''}}view=k;armed=0;render()}
  else if(a=='ft'){snap();ft=+k;fillTm()}
  else if(a=='m'){var y=+ym.slice(0,4),m=+ym.slice(5,7)-1+(+k),d=new Date(y,m,1);ym=iso(d).slice(0,7);armed=0;render()}
  else if(a=='del'){if(armed==k){S.tx=S.tx.filter(function(x){return x.id!=k});armed=0;save();toast('ลบรายการแล้ว')}else{armed=+k;setTimeout(function(){if(armed==k){armed=0;render()}},2500)}render()}
