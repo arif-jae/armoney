@@ -50,7 +50,8 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
 .sp{display:flex;justify-content:space-between;gap:8px}
 nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
 nav button{flex:1;max-width:130px;border:0;background:none;padding:6px 0;font-size:13px;color:var(--mut);border-radius:10px}
-nav button b{display:block;font-size:20px;font-weight:400}
+nav button b{display:flex;align-items:center;justify-content:center;width:56px;height:30px;margin:0 auto 2px;border-radius:15px;transition:background .2s}
+nav button.on b{background:color-mix(in srgb,currentColor 20%,transparent)}
 nav button.on{color:var(--acc);font-weight:600}
 .bi{fill:var(--inc)}.be{fill:var(--exp)}.ln{stroke:var(--acc);fill:none;stroke-width:2}.ax{stroke:var(--line);stroke-width:1}.av{stroke:var(--acc);stroke-width:1.5;stroke-dasharray:4 3}.tx{fill:var(--mut);font-size:9px}
 .stats button{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:left;display:block}
@@ -58,7 +59,8 @@ nav button.on{color:var(--acc);font-weight:600}
 #fm[hidden],#fs[hidden]{display:none}
 .fi{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:24px;padding:12px 20px;font-weight:600;font-size:16px;box-shadow:0 3px 10px rgba(0,0,0,.25)}
 #fs{position:fixed;inset:0;z-index:3;background:rgba(0,0,0,.25)}
-#fab{transition:transform .2s}#fab.on{transform:rotate(45deg)}
+#fab{display:grid;place-items:center;transition:transform .2s}
+.fic{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;margin-right:10px;vertical-align:middle;color:#fff}#fab.on{transform:rotate(45deg)}
 #fab{position:fixed;right:14px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:4;background:var(--acc);color:var(--accfg);border:0;border-radius:50%;width:56px;height:56px;padding:0;font-weight:400;font-size:32px;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 #ok{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.9);z-index:20;background:var(--card);border:2px solid var(--inc);border-radius:16px;padding:20px 28px;text-align:center;min-width:230px;box-shadow:0 8px 30px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
 #ok.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -86,7 +88,7 @@ details summary{cursor:pointer;font-weight:500}
 <div id="ok" role="status" aria-live="polite"></div>
 <div class="mdl" id="tm" hidden></div>
 <div class="mdl" id="cm" hidden></div>
-<div id="fs" hidden data-a="fclose"></div><div id="fm" hidden></div><button id="fab" data-a="fab" aria-label="เพิ่ม" aria-expanded="false">+</button>
+<div id="fs" hidden data-a="fclose"></div><div id="fm" hidden></div><button id="fab" data-a="fab" aria-label="เพิ่ม" aria-expanded="false"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
 <script>
 var K='moneyapp.v1';
 var G=[{id:1,n:'เงินสด',l:0,e:'💵'},{id:2,n:'เงินฝากธนาคาร',l:0,e:'🏦'},{id:3,n:'เงินออนไลน์',l:0,e:'📱'},{id:5,n:'สหกรณ์ออมทรัพย์',l:0,e:'🤝'},{id:7,n:'ลูกหนี้',l:0,e:'🤲'},{id:4,n:'หนี้สิน',l:1,e:'💳'}];
@@ -146,9 +148,12 @@ function vSum(){
  if(!ks.length)h+='<span class="mut">ยังไม่มี'+(ex?'รายจ่าย':'รายรับ')+'ในเดือนนี้</span>';
  ks.forEach(function(k){var p=Math.round(src[k]/tot*100);h+='<div style="margin:8px 0"><div class="sp"><span>'+ih(cat(k))+' '+esc(cat(k).n)+'</span><span>'+fmt(src[k])+' <span class="mut">('+p+'%)</span></span></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'});
  return h+'</div>'}
+var NC={sum:'#3b82f6',list:'#f08c00',acc:'#8b5cf6'};
+var IC={sum:'<path d="M21 12A9 9 0 1 1 12 3"/><path d="M12 3v9h9"/>',list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/>',acc:'<path d="M4 7h13a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 7V6a2 2 0 0 1 2-2h10"/><path d="M16 14h4"/>',wad:'<path d="M4 7h13a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 7V6a2 2 0 0 1 2-2h10"/><path d="M11 11v6M8 14h6"/>',tag:'<path d="M3 4h8.5l9 9a2 2 0 0 1 0 2.8l-5.7 5.7a2 2 0 0 1-2.8 0L3 12.5z"/><circle cx="7.5" cy="8.5" r="1.3"/>',out:'<path d="M7 17L17 7M9 7h8v8"/>',in:'<path d="M17 7L7 17M15 17H7V9"/>',swap:'<path d="M5 8h13l-3-3M19 16H6l3 3"/>'};
+function sv(p,w){w=w||24;return'<svg width="'+w+'" height="'+w+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>'}
 var fo=false;
-function fmenu(){var m=$('fm'),f=$('fab'),a=view=='acc',its=a?[['m-acc','เพิ่มบัญชี'],['m-cat','เพิ่มหมวดหมู่']]:[[2,'รายจ่าย'],[1,'รายรับ'],[3,'โอนเงิน']];
- m.innerHTML=its.map(function(p){return'<button class="fi" data-a="'+(a?'fopen':'newt')+'" data-k="'+p[0]+'">'+p[1]+'</button>'}).join('');
+function fmenu(){var m=$('fm'),f=$('fab'),a=view=='acc',its=a?[['m-acc','เพิ่มบัญชี','wad','#8b5cf6'],['m-cat','เพิ่มหมวดหมู่','tag','#f08c00']]:[[2,'รายจ่าย','out','#e5484d'],[1,'รายรับ','in','#2fa866'],[3,'โอนเงิน','swap','#3b82f6']];
+ m.innerHTML=its.map(function(p){return'<button class="fi" data-a="'+(a?'fopen':'newt')+'" data-k="'+p[0]+'"><span class="fic" style="background:'+p[3]+'">'+sv(IC[p[2]],16)+'</span>'+p[1]+'</button>'}).join('');
  m.hidden=$('fs').hidden=!fo;f.className=fo?'on':'';f.setAttribute('aria-expanded',fo?'true':'false')}
 var CH;
 function cdraw(){if(!$('c1')||!CH)return;var z=CH.ps[CH.sel],set=function(i,t){$('c'+i).textContent=t};
@@ -187,7 +192,7 @@ function render(){pimg=undefined;ecur=null;
  $('hd').className=(view=='list'||view=='sum')?'':'off';
  $('mt').textContent=new Date(ym+'-01T00:00:00').toLocaleDateString('th-TH',{month:'long',year:'numeric'});
  $('v').innerHTML={add:vAdd,list:vList,sum:vSum,acc:vAcc}[view]();
- $('nav').innerHTML=[['sum','📊','สรุป'],['list','📋','รายการ'],['acc','🏦','บัญชี']].map(function(p){return'<button data-a="tab" data-k="'+p[0]+'" class="'+(view==p[0]?'on':'')+'"><b>'+p[1]+'</b>'+p[2]+'</button>'}).join('')}
+ $('nav').innerHTML=[['sum','📊','สรุป'],['list','📋','รายการ'],['acc','🏦','บัญชี']].map(function(p){return'<button data-a="tab" data-k="'+p[0]+'" class="'+(view==p[0]?'on':'')+'"><b style="color:'+NC[p[0]]+'">'+sv(IC[p[0]])+'</b>'+p[2]+'</button>'}).join('')}
 function act(a,k){
  if(a=='edit'){var id=+k.slice(1),m=k[0]=='a'?'m-acc':'m-cat';eid=id;
   if(k[0]=='a'){var A=acc(id);$('an').value=A.n;$('ag').value=A.g;$('ai').value=A.i;$('ae').value=A.e||'';$('ano').value=A.note||'';$(m).querySelector('h2').textContent='แก้ไขบัญชี'}
