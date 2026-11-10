@@ -151,10 +151,10 @@ function vAdd(){
  var toSel=dr.to||(S.accs.filter(function(x){return x.id!=dr.ac})[0]||S.accs[0]).id,toL=ft==3&&isL(acc(toSel)),spOn=toL&&dr.spl;
  var seg=[[2,'รายจ่าย'],[1,'รายรับ'],[3,'โอนเงิน']].map(function(p){return'<button data-a="ft" data-k="'+p[0]+'" class="'+(ft==p[0]?'on':'')+'">'+p[1]+'</button>'}).join('');
  var second=ft==3?picker('to','ไปยังบัญชี',toSel):cpicker('cat','หมวดหมู่',dr.cat);
- return'<div class="card"><div class="sp"><h2 style="margin:0">'+(etx?'แก้ไขรายการ':'เพิ่มรายการ')+'</h2><button class="x" data-a="close" aria-label="ปิด">✕</button></div><div class="seg">'+seg+'</div><div id="amtw"'+(spOn?' hidden':'')+'><label for="amt">จำนวนเงิน (บาท)</label><input id="amt" inputmode="decimal" placeholder="0.00" value="'+esc(dr.amt)+'"></div>'
+ return'<div class="card"><div class="sp"><h2 style="margin:0">'+(etx?'แก้ไขรายการ':'เพิ่มรายการ')+'</h2><button class="x" data-a="close" aria-label="ปิด">✕</button></div><div class="seg">'+seg+'</div><label for="dt">วันที่</label><input id="dt" type="date" value="'+esc(dr.dt)+'"><div id="amtw"'+(spOn?' hidden':'')+'><label for="amt">จำนวนเงิน (บาท)</label><input id="amt" inputmode="decimal" placeholder="0.00" value="'+esc(dr.amt)+'"></div>'
  +picker('ac',ft==3?'จากบัญชี':'บัญชี',dr.ac)+second+(ft==3?pib(toL,spOn):'')
  +'<label for="nt">บันทึกช่วยจำ</label><input id="nt" placeholder="เช่น ข้าวกลางวัน" value="'+esc(dr.nt)+'">'
- +'<label for="dt">วันที่</label><input id="dt" type="date" value="'+esc(dr.dt)+'"><button class="go" data-a="add">'+(etx?'บันทึกการแก้ไข':'บันทึก')+'</button></div>'}
+ +'<button class="go" data-a="add">'+(etx?'บันทึกการแก้ไข':'บันทึก')+'</button></div>'}
 function fillTm(){var t=$('tm');t.innerHTML=vAdd();t.hidden=false}
 function tclose(){var t=$('tm');t.hidden=true;t.innerHTML=''}
 function monthTx(){return S.tx.filter(function(x){return x.d.slice(0,7)==ym})}
