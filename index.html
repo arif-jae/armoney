@@ -307,7 +307,27 @@ function act(a,k){
  else if(a=='xc'){if(!S.tx.length)toast('ยังไม่มีรายการให้ส่งออก');else saveFile('money-transactions-'+iso(new Date())+'.csv',csvx(),'text/csv')}}
 document.addEventListener('change',function(e){var t=e.target;if(t.id=='ag'){rtg();return}if(t.id=='spl'){$('pif').hidden=!t.checked;$('amtw').hidden=t.checked;return}if(t.id=='bf'){var f0=t.files[0];if(f0){var r0=new FileReader();r0.onload=function(){doImport(r0.result)};r0.readAsText(f0)}return}if(t.id!='af'&&t.id!='cf')return;var f=t.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas');c.width=c.height=96;var s=Math.min(im.width,im.height);c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,96,96);pimg=c.toDataURL('image/jpeg',.8);pv(t.id=='af'?'ap':'cp')};im.onerror=function(){toast('อ่านไฟล์รูปไม่ได้ ลองใช้ JPG หรือ PNG')};im.src=r.result};r.readAsDataURL(f)});
 document.addEventListener('input',function(e){var t=e.target;if(t.id=='pr_'||t.id=='it_')$('pit').textContent=pitxt($('pr_').value,$('it_').value)});
-document.addEventListener('click',function(e){var b=e.target.closest('[data-a]');if(b)act(b.dataset.a,b.dataset.k);else if(e.target.classList.contains('mdl'))act('close')});
+var hdepth=0,hskip=0;
+function depth(){var n=0,op=function(i){return $(i)&&!$(i).hidden};
+ if(op('cm'))n++;if(op('tm'))n++;if(op('m-acc')||op('m-cat'))n++;if(fo)n++;if(tk)n++;if(ik)n++;if(gk)n++;if(view!='sum')n++;return n}
+function hsync(){if(hskip>0)return;var d=depth();
+ while(hdepth<d){hdepth++;try{history.pushState({h:hdepth},'')}catch(e){}}
+ if(hdepth>d){var n=hdepth-d;hdepth=d;hskip++;try{history.go(-n)}catch(e){hskip=0}setTimeout(function(){hskip=0},800)}}
+function goBack(){
+ if(!$('cm').hidden){$('cm').hidden=true;return}
+ if(!$('tm').hidden){etx=0;tclose();return}
+ if(($('m-acc')&&!$('m-acc').hidden)||($('m-cat')&&!$('m-cat').hidden)){act('close');return}
+ if(fo){fo=false;fmenu();return}
+ if(tk){act('tb');return}
+ if(ik){act('ib');return}
+ if(gk){act('gb');return}
+ if(view!='sum')act('tab','sum')}
+window.addEventListener('popstate',function(e){var nd=(e.state&&e.state.h)||0;
+ if(hskip>0){hskip--;hsync();return}
+ if(nd>hdepth){hskip++;try{history.go(hdepth-nd)}catch(x){hskip=0}setTimeout(function(){hskip=0},800);return}
+ hdepth=nd;goBack();hsync()});
+function go(a,k){act(a,k);hsync()}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-a]');if(b)go(b.dataset.a,b.dataset.k);else if(e.target.classList.contains('mdl'))go('close')});
 render();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 </script>
